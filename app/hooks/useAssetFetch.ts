@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Asset, UseAssetDataResult } from '../api/models';
-import {rawData} from '../data'
 
 export const useAssetFetch = (): UseAssetDataResult => {
     const [assets, setAssets] = useState<Asset[]>([]);
@@ -12,14 +11,32 @@ export const useAssetFetch = (): UseAssetDataResult => {
             setLoading(true);
             setError(null);
 
-            const response = await mockFetchAssets();
-            
-            if (!response.success) {
+            const response = await fetch('/api/assets');
+
+            if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            const result: Asset[] = await response.json();
-            setAssets(result);
+            const body: any = await response.json();
+
+            if (Array.isArray(body)) {
+                setAssets(body as Asset[]);
+            } else if (body && typeof body === 'object' && 'success' in body) {
+                if (body.success === true) {
+                    if (Array.isArray(body.data)) {
+                        setAssets(body.data as Asset[]);
+                    } else {
+                        setError('Invalid response format');
+                        setAssets([]);
+                    }
+                } else {
+                    setError(typeof body.message === 'string' ? body.message : 'Failed to fetch assets');
+                    setAssets([]);
+                }
+            } else {
+                setError('Invalid response format');
+                setAssets([]);
+            }
         } catch (err) {
             const errorMessage = err instanceof Error 
                 ? err.message 
@@ -41,18 +58,9 @@ export const useAssetFetch = (): UseAssetDataResult => {
         assets,
         loading,
         error,
-        refetch: fetchAssets
-    };
-};
-
-const mockFetchAssets = async () => {
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    const mockData: Asset[] = rawData
-
-    return {
-        success: true,
-        json: async () => mockData,
-        status: 200
+        refetch: async () => {
+            await fetchAssets();
+            await new Promise(resolve => setTimeout(resolve, 0));
+        }
     };
 };
