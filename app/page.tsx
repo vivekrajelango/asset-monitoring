@@ -1,7 +1,7 @@
 "use client"
 import { useMemo, useState } from 'react';
 import { useAssetFetch } from './hooks/useAssetFetch';
-import { ChevronRight, ChevronLeft, ChevronDown, Filter, X } from 'lucide-react';
+import { ChevronRight, ChevronLeft, ChevronDown, Filter, X, Search } from 'lucide-react';
 // import { rawData } from './data';
 import { Asset, AssetAttribute } from './api/models';
 
@@ -10,6 +10,7 @@ export default function AssetMonitoringUI() {
     const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
     const [expandedNodes, setExpandedNodes] = useState(new Set());
     const [typeFilter, setTypeFilter] = useState<string>('');
+    const [nameQuery, setNameQuery] = useState<string>('');
     const [showFilter, setShowFilter] = useState(false);
     const [showMobileDetails, setShowMobileDetails] = useState(false);
 
@@ -26,17 +27,19 @@ export default function AssetMonitoringUI() {
         };
         collectTypes(assets);
         return Array.from(types).sort();
-    }, []);
+    }, [assets]);
 
     const filterAssets = (assets: Asset[]): Asset[] | null => {
         const assetArray = Array.isArray(assets) ? assets : [assets];
         console.log('assetArray', assetArray);
-        if (!typeFilter) return assetArray;
+        const query = nameQuery.trim().toLowerCase();
+        if (!typeFilter && !query) return assetArray;
 
         const filtered: Asset[] = [];
 
         assetArray.forEach((asset: Asset) => {
-            const matchesFilter: boolean = asset.type === typeFilter;
+            const matchesType = !typeFilter || asset.type === typeFilter;
+            const matchesName = !query || asset.name.toLowerCase().includes(query);
             let filteredChildren = null;
 
             if (asset.children) {
@@ -44,7 +47,10 @@ export default function AssetMonitoringUI() {
                 filteredChildren = filterAssets(assetChildArray);
             }
 
-            if (matchesFilter || (filteredChildren && filteredChildren.length > 0)) {
+            const includeSelf = matchesType && matchesName;
+            const includeChild = !!filteredChildren && filteredChildren.length > 0;
+
+            if (includeSelf || includeChild) {
                 filtered.push({
                     ...asset,
                     children: filteredChildren || undefined
@@ -245,6 +251,18 @@ export default function AssetMonitoringUI() {
                             </div>
                         </div>
                     )}
+
+                    <div className="my-4 px-1 sm:px-2">
+                        <div className="relative">
+                            <input
+                                type="search"
+                                value={nameQuery}
+                                onChange={(e) => setNameQuery(e.target.value)}
+                                placeholder="Search by name..."
+                                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            />
+                        </div>
+                    </div>
 
                     <div className="mt-3 flex flex-col sm:flex-row sm:items-center justify-between text-xs text-gray-500 gap-1">
                         <span>{displayedAssets} of {totalAssets} assets</span>
