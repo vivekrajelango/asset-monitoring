@@ -1,10 +1,12 @@
 "use client"
 import { useMemo, useState } from 'react';
+import { useAssetFetch } from './hooks/useAssetFetch';
 import { ChevronRight, ChevronLeft, ChevronDown, Filter, X } from 'lucide-react';
-import { rawData } from './data';
+// import { rawData } from './data';
 import { Asset, AssetAttribute } from './api/models';
 
 export default function AssetMonitoringUI() {
+    const { assets, loading, error, refetch } = useAssetFetch();
     const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
     const [expandedNodes, setExpandedNodes] = useState(new Set());
     const [typeFilter, setTypeFilter] = useState<string>('');
@@ -22,7 +24,7 @@ export default function AssetMonitoringUI() {
                 }
             });
         };
-        collectTypes(rawData);
+        collectTypes(assets);
         return Array.from(types).sort();
     }, []);
 
@@ -53,7 +55,7 @@ export default function AssetMonitoringUI() {
         return filtered.length > 0 ? filtered : null;
     };
 
-    const filteredAssets = filterAssets(rawData) || [];
+    const filteredAssets = filterAssets(assets) || [];
 
     const countAssets = (assets: Asset | Asset[]) => {
         const assetArray = Array.isArray(assets) ? assets : [assets];
@@ -66,7 +68,7 @@ export default function AssetMonitoringUI() {
         return count;
     };
 
-    const totalAssets = countAssets(rawData);
+    const totalAssets = countAssets(assets);
     const displayedAssets = filteredAssets.length > 0 ? countAssets(filteredAssets) : 0;
 
     const tooggleNode = (id: number) => {
@@ -155,6 +157,36 @@ export default function AssetMonitoringUI() {
             </div>
         );
     };
+
+     if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-gray-50">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                    <p className="text-gray-600">Loading assets...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-gray-50">
+                <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md w-full mx-4">
+                    <div className="text-center">
+                        <h3 className="text-red-800 font-medium text-lg mb-2">Error Loading Assets</h3>
+                        <p className="text-red-600 mb-4">{error}</p>
+                        <button
+                            onClick={refetch}
+                            className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition-colors"
+                        >
+                            Try Again
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="flex flex-col lg:flex-row min-h-screen bg-gray-50">

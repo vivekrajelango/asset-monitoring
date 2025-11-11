@@ -11,3 +11,16 @@ export interface Asset {
     attributes?: AssetAttribute[];
     children?:Asset[] | Asset
 }
+
+export interface UseAssetDataResult {
+    assets: Asset[];
+    loading: boolean;
+    error: string | null;
+    refetch: () => Promise<void>;
+}
+
+export interface AssetApiResponse {
+    data: Asset[];
+    message?: string;
+    success: boolean;
+}
