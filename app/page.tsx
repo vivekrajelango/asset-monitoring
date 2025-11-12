@@ -5,6 +5,7 @@ import { ChevronLeft, Filter, X, Search } from 'lucide-react';
 // import { rawData } from './data';
 import { Asset, AssetAttribute } from './types';
 import { AssetNode } from './components/AssetNode';
+import { AssetDetails } from './components/AssetDetails';
 
 export default function AssetMonitoringUI() {
     const { assets, loading, error, refetch } = useAssetFetch();
@@ -249,161 +250,13 @@ export default function AssetMonitoringUI() {
                 ${selectedAsset && !showMobileDetails ? 'hidden lg:block' : 'block'}
                 `}>
                 {selectedAsset ? (
-                    <div className="p-3 sm:p-6 lg:p-8">
-                        <div className="lg:hidden mb-4">
-                            <button
-                                onClick={() => {
-                                    setSelectedAsset(null);
-                                    setShowMobileDetails(false);
-                                }}
-                                className="flex items-center gap-2 text-blue-600 hover:text-blue-700"
-                            >
-                                <ChevronLeft size={20} />
-                                Back to Assets
-                            </button>
-                        </div>
-
-                        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
-                            <div className="flex flex-col sm:flex-row sm:items-start justify-between mb-6 gap-3">
-                                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 min-w-0">
-                                    <h2 className="text-xl sm:text-2xl font-bold text-gray-900 truncate">
-                                        {selectedAsset.name}
-                                    </h2>
-                                    <span className="px-3 py-1 bg-indigo-100 text-indigo-700 text-sm rounded-full font-medium self-start sm:self-auto flex-shrink-0">
-                                        Type {selectedAsset.type}
-                                    </span>
-                                </div>
-                                <button
-                                    onClick={() => {
-                                        setSelectedAsset(null);
-                                        setShowMobileDetails(false);
-                                    }}
-                                    className="p-2 hover:bg-gray-100 rounded transition-colors self-end sm:self-auto flex-shrink-0"
-                                    title="Close details"
-                                >
-                                    <X size={20} />
-                                </button>
-                            </div>
-
-                            <div className="space-y-4 sm:space-y-6">
-                                <div>
-                                    <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
-                                        Asset ID
-                                    </h3>
-                                    <p className="text-gray-900 font-mono bg-gray-50 px-3 py-2 rounded border border-gray-200 inline-block text-sm sm:text-base break-all">
-                                        {selectedAsset.id}
-                                    </p>
-                                </div>
-
-                                {selectedAsset.description && (
-                                    <div>
-                                        <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
-                                            Description
-                                        </h3>
-                                        <p className="text-gray-900 bg-gray-50 px-3 sm:px-4 py-2 sm:py-3 rounded border border-gray-200 text-sm sm:text-base">
-                                            {selectedAsset.description}
-                                        </p>
-                                    </div>
-                                )}
-
-                                {selectedAsset.attributes && selectedAsset.attributes.length > 0 && (
-                                    <div>
-                                        <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
-                                            Attributes ({selectedAsset.attributes.length})
-                                        </h3>
-                                        <div className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
-                                            <div className="sm:hidden divide-y divide-gray-200 bg-white">
-                                                {selectedAsset.attributes.map((attr: AssetAttribute, idx: number) => (
-                                                    <div key={idx} className="p-3 hover:bg-gray-50 transition-colors">
-                                                        <div className="text-sm font-medium text-gray-900 mb-1">
-                                                            {attr.key}
-                                                        </div>
-                                                        <div className="text-sm text-gray-700 font-mono break-all">
-                                                            {attr.value}
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-
-                                            <div className="hidden sm:block">
-                                                <table className="w-full">
-                                                    <thead className="bg-gray-100">
-                                                        <tr>
-                                                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                                                Key
-                                                            </th>
-                                                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                                                Value
-                                                            </th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody className="divide-y divide-gray-200 bg-white">
-                                                        {selectedAsset.attributes.map((attr: AssetAttribute, idx: number) => (
-                                                            <tr key={idx} className="hover:bg-gray-50 transition-colors">
-                                                                <td className="px-4 py-3 text-sm font-medium text-gray-900">
-                                                                    {attr.key}
-                                                                </td>
-                                                                <td className="px-4 py-3 text-sm text-gray-700 font-mono break-all">
-                                                                    {attr.value}
-                                                                </td>
-                                                            </tr>
-                                                        ))}
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {selectedAsset.children && (
-                                    <div>
-                                        <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
-                                            Child Assets
-                                        </h3>
-                                        <div className="bg-blue-50 border border-blue-200 rounded-lg px-3 sm:px-4 py-2 sm:py-3 flex items-center gap-2">
-                                            <span className="text-blue-700 text-sm sm:text-base">
-                                                This asset has {Array.isArray(selectedAsset.children) ? selectedAsset.children.length : 1} direct child{Array.isArray(selectedAsset.children) && selectedAsset.children.length !== 1 ? 'ren' : ''}
-                                            </span>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {!selectedAsset.description && (!selectedAsset.attributes || selectedAsset.attributes.length === 0) && !selectedAsset.children && (
-                                    <div className="text-center py-6 sm:py-8 text-gray-400 bg-gray-50 rounded-lg border border-gray-200">
-                                        <div className="text-2xl sm:text-3xl mb-2">📋</div>
-                                        <p className="text-sm sm:text-base">No additional details available for this asset</p>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-
-                        <div className="mt-4 sm:mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-                            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-4">
-                                <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-                                    Type
-                                </div>
-                                <div className="text-xl sm:text-2xl font-bold text-indigo-600">
-                                    {selectedAsset.type}
-                                </div>
-                            </div>
-                            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-4">
-                                <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-                                    Attributes
-                                </div>
-                                <div className="text-xl sm:text-2xl font-bold text-green-600">
-                                    {selectedAsset.attributes?.length || 0}
-                                </div>
-                            </div>
-                            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-4">
-                                <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-                                    Children
-                                </div>
-                                <div className="text-xl sm:text-2xl font-bold text-blue-600">
-                                    {selectedAsset.children ? (Array.isArray(selectedAsset.children) ? selectedAsset.children.length : 1) : 0}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <AssetDetails
+                        asset={selectedAsset}
+                        onClose={() => {
+                            setSelectedAsset(null);
+                            setShowMobileDetails(false);
+                        }}
+                    />
                 ) : (
                     <div className="flex items-center justify-center min-h-[50vh] lg:h-full text-gray-400 p-4">
                         <div className="text-center max-w-md">
