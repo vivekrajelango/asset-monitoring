@@ -1,14 +1,15 @@
 "use client"
 import { useMemo, useState } from 'react';
 import { useAssetFetch } from './hooks/useAssetFetch';
-import { ChevronRight, ChevronLeft, ChevronDown, Filter, X, Search } from 'lucide-react';
+import { ChevronLeft, Filter, X, Search } from 'lucide-react';
 // import { rawData } from './data';
 import { Asset, AssetAttribute } from './types';
+import { AssetNode } from './components/AssetNode';
 
 export default function AssetMonitoringUI() {
     const { assets, loading, error, refetch } = useAssetFetch();
     const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
-    const [expandedNodes, setExpandedNodes] = useState(new Set());
+    const [expandedNodes, setExpandedNodes] = useState<Set<number>>(new Set<number>());
     const [typeFilter, setTypeFilter] = useState<string>('');
     const [nameQuery, setNameQuery] = useState<string>('');
     const [showFilter, setShowFilter] = useState(false);
@@ -78,7 +79,7 @@ export default function AssetMonitoringUI() {
     const displayedAssets = filteredAssets.length > 0 ? countAssets(filteredAssets) : 0;
 
     const tooggleNode = (id: number) => {
-        const newExpanded = new Set(expandedNodes);
+        const newExpanded: Set<number> = new Set(expandedNodes);
         if (newExpanded.has(id)) {
             newExpanded.delete(id);
         } else {
@@ -88,7 +89,7 @@ export default function AssetMonitoringUI() {
     };
 
     const expandAll = () => {
-        const allIds = new Set();
+        const allIds: Set<number> = new Set<number>();
         const collectIds = (assets: Asset | Asset[]) => {
             const assetArray = Array.isArray(assets) ? assets : [assets];
             assetArray.forEach((asset: Asset) => {
@@ -103,65 +104,12 @@ export default function AssetMonitoringUI() {
     };
 
     const collapseAll = () => {
-        setExpandedNodes(new Set());
+        setExpandedNodes(new Set<number>());
     };
 
     const handleAssetSelect = (asset: Asset) => {
         setSelectedAsset(asset);
         setShowMobileDetails(true);
-    };
-
-    const renderAssetTree = (asset: Asset, depth = 0) => {
-        const hasChildren = asset.children && (
-            Array.isArray(asset.children) ? asset.children.length > 0 : true
-        );
-        const isExpanded = expandedNodes.has(asset.id);
-        const isSelected = selectedAsset?.id === asset.id;
-
-        return (
-            <div key={asset.id} className="select-none">
-                <div
-                    className={`flex items-center gap-1 sm:gap-2 py-2 px-2 sm:px-3 cursor-pointer hover:bg-gray-100 rounded transition-colors ${isSelected ? 'bg-blue-50 border-l-4 border-blue-500' : ''
-                        }`}
-                    style={{ paddingLeft: `${depth * 16 + 8}px` }}
-                    onClick={() => handleAssetSelect(asset)}
-                >
-                    {hasChildren && (
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                tooggleNode(asset.id);
-                            }}
-                            className="p-0.5 hover:bg-gray-200 rounded flex-shrink-0"
-                        >
-                            {isExpanded ? (
-                                <ChevronDown size={16} />
-                            ) : (
-                                <ChevronRight size={16} />
-                            )}
-                        </button>
-                    )}
-                    {!hasChildren && <div className="w-4 sm:w-5 flex-shrink-0" />}
-
-                    <div className="flex-1 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 min-w-0">
-                        <span className="font-medium text-gray-900 text-sm sm:text-base truncate">
-                            {asset.name}
-                        </span>
-                        <span className="px-2 py-0.5 bg-indigo-100 text-indigo-700 text-xs rounded-full font-medium self-start sm:self-auto flex-shrink-0">
-                            Type {asset.type}
-                        </span>
-                    </div>
-                </div>
-
-                {hasChildren && isExpanded && (
-                    <div>
-                        {Array.isArray(asset.children)
-                            ? asset.children.map((child: Asset) => renderAssetTree(child, depth + 1))
-                            : renderAssetTree(asset.children as Asset, depth + 1)}
-                    </div>
-                )}
-            </div>
-        );
     };
 
      if (loading) {
@@ -277,7 +225,16 @@ export default function AssetMonitoringUI() {
                 <div className="flex-1 overflow-y-auto">
                     {filteredAssets.length > 0 ? (
                         <div className="p-1 sm:p-2">
-                            {filteredAssets.map(asset => renderAssetTree(asset))}
+                            {filteredAssets.map(asset => (
+                                <AssetNode
+                                  key={asset.id}
+                                  asset={asset}
+                                  expandedNodes={expandedNodes}
+                                  selectedAssetId={selectedAsset?.id ?? null}
+                                  onToggleNode={tooggleNode}
+                                  onSelect={handleAssetSelect}
+                                />
+                            ))}
                         </div>
                     ) : (
                         <div className="p-4 text-center text-gray-500">

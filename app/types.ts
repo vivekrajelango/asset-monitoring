@@ -18,3 +18,12 @@ export type UseAssetDataResult = {
   error: string | null;
   refetch: () => void;
 };
+
+export type AssetNodeProps = {
+  asset: Asset;
+  depth?: number;
+  expandedNodes: Set<number>;
+  selectedAssetId?: number | null;
+  onToggleNode: (id: number) => void;
+  onSelect: (asset: Asset) => void;
+};
