@@ -21,7 +21,7 @@ export function AssetDetails({ asset, onClose }: AssetDetailsProps) {
       </div>
 
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
-        <div className="flex flex-col sm:flex-row sm:items-start justify-between mb-6 gap-3">
+        <div className="flex items-start justify-between mb-6 gap-3">
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 min-w-0">
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900 truncate">
               {asset.name}
@@ -32,7 +32,7 @@ export function AssetDetails({ asset, onClose }: AssetDetailsProps) {
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded transition-colors self-end sm:self-auto flex-shrink-0"
+            className="p-2 hover:bg-gray-100 rounded transition-colors flex-shrink-0"
             title="Close details"
           >
             <X size={20} />
