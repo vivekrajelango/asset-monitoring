@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react';
 import { useAssetFetch } from './hooks/useAssetFetch';
 import { ChevronRight, ChevronLeft, ChevronDown, Filter, X, Search } from 'lucide-react';
 // import { rawData } from './data';
-import { Asset, AssetAttribute } from './api/models';
+import { Asset, AssetAttribute } from './types';
 
 export default function AssetMonitoringUI() {
     const { assets, loading, error, refetch } = useAssetFetch();
